@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Phone, ChevronDown, Calculator, TrendingUp, Search, Bot, BarChart3 } from 'lucide-react';
+import { Menu, X, Phone, ChevronDown, Calculator, TrendingUp, Search, Bot, BarChart3, LogIn, User } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const serviceCategories = [
   'CAF e Patronato', 'Lavoro e Pensioni', 'Famiglie', 'Stranieri', 'Casa', 'Comune', 'PRA', 'Certificati'
@@ -28,6 +29,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const location = useLocation();
+  const { user, isAdmin, isOperatore } = useAuth();
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
@@ -125,12 +127,23 @@ export default function Header() {
               <Phone className="w-4 h-4" />
               800.123.456
             </a>
-            <Link
-              to="/contatti"
-              className="px-5 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors"
-            >
-              Richiedi Info
-            </Link>
+            {user ? (
+              <Link
+                to={isAdmin || isOperatore ? '/admin' : '/area-cliente'}
+                className="flex items-center gap-2 px-5 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors"
+              >
+                <User className="w-4 h-4" />
+                {isAdmin || isOperatore ? 'Area Patronato' : 'Area Cliente'}
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-2 px-5 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors"
+              >
+                <LogIn className="w-4 h-4" />
+                Accedi
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -170,13 +183,25 @@ export default function Header() {
                   <Phone className="w-4 h-4" />
                   800.123.456
                 </a>
-                <Link
-                  to="/contatti"
-                  className="mx-4 mt-2 block px-4 py-3 bg-blue-900 text-white text-center text-sm font-medium rounded-lg"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Richiedi Info
-                </Link>
+                {user ? (
+                  <Link
+                    to={isAdmin || isOperatore ? '/admin' : '/area-cliente'}
+                    className="mx-4 mt-2 flex items-center justify-center gap-2 px-4 py-3 bg-blue-900 text-white text-sm font-medium rounded-lg"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User className="w-4 h-4" />
+                    {isAdmin || isOperatore ? 'Area Patronato' : 'Area Cliente'}
+                  </Link>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="mx-4 mt-2 flex items-center justify-center gap-2 px-4 py-3 bg-blue-900 text-white text-sm font-medium rounded-lg"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Accedi / Registrati
+                  </Link>
+                )}
               </div>
             </nav>
           </div>
