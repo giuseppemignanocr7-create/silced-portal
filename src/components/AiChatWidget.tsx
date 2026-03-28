@@ -67,7 +67,7 @@ export default function AiChatWidget() {
   };
 
   return (
-    <div className="fixed bottom-20 right-6 z-40">
+    <div className="fixed bottom-6 right-6 z-40">
       {open && (
         <div className="mb-3 w-72 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col" style={{ height: '340px' }}>
           {/* Header */}

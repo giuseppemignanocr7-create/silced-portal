@@ -3,7 +3,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import CookieBanner from './components/CookieBanner';
-import WhatsAppWidget from './components/WhatsAppWidget';
+
 import AiChatWidget from './components/AiChatWidget';
 import HomePage from './pages/HomePage';
 import ServicesPage from './pages/ServicesPage';
@@ -53,7 +53,6 @@ function App() {
         </main>
         <Footer />
         <AiChatWidget />
-        <WhatsAppWidget />
         <CookieBanner />
       </div>
     </BrowserRouter>

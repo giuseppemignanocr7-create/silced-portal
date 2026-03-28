@@ -14,19 +14,31 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white py-16 lg:py-24">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-              Servizi CAF e Patronato Online
+      <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white py-20 sm:py-24 lg:py-32 overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="container relative z-10">
+          <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm text-blue-200 mb-8">
+              <Sparkles className="w-4 h-4" />
+              Sindacato Italiano Lavoratori — CAF e Patronato
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 sm:mb-8 leading-tight tracking-tight">
+              Servizi CAF e<br className="hidden sm:block" /> Patronato Online
             </h1>
-            <p className="text-lg sm:text-xl text-blue-100 mb-8">
+
+            <p className="text-base sm:text-lg lg:text-xl text-blue-100/90 mb-10 sm:mb-12 max-w-2xl mx-auto leading-relaxed">
               Risolviamo le tue pratiche senza bisogno di andare allo sportello. 
               Domande, richieste e consulenze direttamente da casa in pochi secondi.
             </p>
 
             {/* Search Box */}
-            <div className="relative max-w-2xl mx-auto">
+            <div className="relative max-w-2xl mx-auto mb-10 sm:mb-12">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -34,7 +46,7 @@ export default function HomePage() {
                   placeholder="Cerca un servizio (es. ISEE, pensione, SPID...)"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-12 pr-4 py-4 sm:py-5 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-lg shadow-black/10 text-sm sm:text-base"
                 />
               </div>
               {searchQuery && (
@@ -48,7 +60,7 @@ export default function HomePage() {
                         to={`/servizi/${service.slug}`}
                         className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                       >
-                        <div className="text-gray-900 font-medium">{service.title}</div>
+                        <div className="text-gray-900 font-medium text-sm">{service.title}</div>
                       </Link>
                     ))}
                 </div>
@@ -56,15 +68,15 @@ export default function HomePage() {
             </div>
 
             {/* Trust Badges */}
-            <div className="flex flex-wrap justify-center gap-4 mt-8 text-sm text-blue-100">
-              <span className="flex items-center gap-1">
-                <Shield className="w-4 h-4" /> Soddisfatti o rimborsati
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-6 text-sm text-blue-200/80">
+              <span className="flex items-center justify-center gap-2">
+                <Shield className="w-4 h-4 text-green-400" /> Soddisfatti o rimborsati
               </span>
-              <span className="flex items-center gap-1">
-                <Award className="w-4 h-4" /> 25+ anni di esperienza
+              <span className="flex items-center justify-center gap-2">
+                <Award className="w-4 h-4 text-yellow-400" /> 25+ anni di esperienza
               </span>
-              <span className="flex items-center gap-1">
-                <Phone className="w-4 h-4" /> Assistenza telefonica
+              <span className="flex items-center justify-center gap-2">
+                <Phone className="w-4 h-4 text-blue-400" /> Assistenza telefonica
               </span>
             </div>
           </div>
