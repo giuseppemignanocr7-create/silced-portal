@@ -42,8 +42,8 @@ function AppLayout() {
   return (
     <>
       <ScrollToTop />
-      <div className="flex flex-col min-h-screen">
-        {!hideLayout && <Header />}
+      <div className="flex flex-col min-h-screen" suppressHydrationWarning>
+        <div style={hideLayout ? { display: 'none' } : undefined}><Header /></div>
         <main className={hideLayout ? '' : 'flex-grow'}>
           <Routes>
             {/* Public */}
@@ -81,7 +81,7 @@ function AppLayout() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
-        {!hideLayout && <Footer />}
+        <div style={hideLayout ? { display: 'none' } : undefined}><Footer /></div>
         <AiChatWidget />
         <CookieBanner />
       </div>
