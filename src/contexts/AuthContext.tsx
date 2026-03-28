@@ -21,7 +21,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signUp: (email: string, password: string, meta: { nome: string; cognome: string }) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any; profile?: { ruolo: string } | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   unreadCount: number;
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string): Promise<Profile | null> => {
     const { data } = await supabase
       .from('profiles')
       .select('*')
@@ -52,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('utente_id', userId)
       .eq('letta', false);
     setUnreadCount(count || 0);
+    return data as Profile | null;
   };
 
   const refreshProfile = async () => {
@@ -101,8 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error || !data.user) return { error, profile: null };
+    const prof = await fetchProfile(data.user.id);
+    return { error, profile: prof };
   };
 
   const signOut = async () => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FileText, Plus, Calendar, Bell, ArrowRight, Bot, User, Settings, LogOut, TrendingUp, FileCheck } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -43,15 +43,20 @@ const statoColors: Record<string, { bg: string; text: string; label: string }> =
 };
 
 export default function DashboardCliente() {
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, isAdmin, isOperatore } = useAuth();
+  const navigate = useNavigate();
   const [pratiche, setPratiche] = useState<Pratica[]>([]);
   const [notifiche, setNotifiche] = useState<Notifica[]>([]);
   const [appuntamenti, setAppuntamenti] = useState<Appuntamento[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
+    if (isAdmin || isOperatore) {
+      navigate('/admin', { replace: true });
+      return;
+    }
     loadData();
-  }, []);
+  }, [isAdmin, isOperatore]);
 
   const loadData = async () => {
     setLoadingData(true);

@@ -35,11 +35,16 @@ export default function LoginPage() {
         setSuccess('Registrazione completata! Controlla la tua email per confermare l\'account.');
       }
     } else {
-      const { error } = await signIn(email, password);
+      const { error, profile: prof } = await signIn(email, password);
       if (error) {
         setError(error.message === 'Invalid login credentials' ? 'Email o password non corretti' : error.message);
       } else {
-        navigate('/area-cliente');
+        const ruolo = prof?.ruolo;
+        if (ruolo === 'admin' || ruolo === 'operatore') {
+          navigate('/admin');
+        } else {
+          navigate('/area-cliente');
+        }
       }
     }
     setLoading(false);
