@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Phone, Mail, MapPin, Clock, Send, CheckCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Send, CheckCircle, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export default function ContattiPage() {
   const [formData, setFormData] = useState({
@@ -11,11 +12,28 @@ export default function ContattiPage() {
     messaggio: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    // Qui andrebbe la logica di invio del form
+    setLoading(true);
+    setError('');
+    const { error: err } = await supabase.from('contatti').insert({
+      nome: formData.nome,
+      cognome: formData.cognome,
+      email: formData.email,
+      telefono: formData.telefono || null,
+      servizio: formData.servizio || null,
+      messaggio: formData.messaggio,
+      stato: 'nuovo',
+    });
+    setLoading(false);
+    if (err) {
+      setError('Errore nell\'invio. Riprova tra qualche istante.');
+    } else {
+      setSubmitted(true);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -111,6 +129,9 @@ export default function ContattiPage() {
                   <h2 className="text-xl font-bold text-gray-900 mb-6">
                     Richiedi informazioni
                   </h2>
+                  {error && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">{error}</div>
+                  )}
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
@@ -232,10 +253,11 @@ export default function ContattiPage() {
 
                     <button
                       type="submit"
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-blue-900 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors"
+                      disabled={loading}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-blue-900 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors disabled:opacity-50"
                     >
-                      <Send className="w-4 h-4" />
-                      Invia richiesta
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                      {loading ? 'Invio in corso...' : 'Invia richiesta'}
                     </button>
                   </form>
                 </>

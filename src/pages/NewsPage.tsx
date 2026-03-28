@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, FileText, TrendingUp, Users, Bell } from 'lucide-react';
+import { ArrowRight, Calendar, FileText, TrendingUp, Users, Bell, CheckCircle, Loader2 } from 'lucide-react';
 import { newsItems } from '../data/services';
+import { supabase } from '../lib/supabase';
 
 export default function NewsPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const categories = [...new Set(newsItems.map(n => n.category))];
+  const [nlEmail, setNlEmail] = useState('');
+  const [nlSent, setNlSent] = useState(false);
+  const [nlLoading, setNlLoading] = useState(false);
   const filteredNews = activeCategory ? newsItems.filter(n => n.category === activeCategory) : newsItems;
   const featuredNews = filteredNews[0];
   const gridNews = filteredNews.slice(1);
@@ -132,26 +136,38 @@ export default function NewsPage() {
         {/* Newsletter */}
         <section className="mt-16">
           <div className="bg-gradient-to-r from-blue-900 to-blue-800 rounded-2xl p-8 lg:p-12 text-center text-white">
-            <Bell className="w-12 h-12 mx-auto mb-4 text-blue-300" />
-            <h2 className="text-2xl font-bold mb-3">
-              Resta aggiornato
-            </h2>
-            <p className="text-blue-100 max-w-xl mx-auto mb-6">
-              Iscriviti alla newsletter per ricevere le ultime novità fiscali e previdenziali direttamente nella tua email.
-            </p>
-            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="La tua email"
-                className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-500 transition-colors whitespace-nowrap"
-              >
-                Iscriviti
-              </button>
-            </form>
+            {nlSent ? (
+              <>
+                <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-400" />
+                <h2 className="text-2xl font-bold mb-3">Iscrizione confermata!</h2>
+                <p className="text-blue-100">Riceverai le prossime news nella tua casella email.</p>
+              </>
+            ) : (
+              <>
+                <Bell className="w-12 h-12 mx-auto mb-4 text-blue-300" />
+                <h2 className="text-2xl font-bold mb-3">Resta aggiornato</h2>
+                <p className="text-blue-100 max-w-xl mx-auto mb-6">
+                  Iscriviti alla newsletter per ricevere le ultime novità fiscali e previdenziali direttamente nella tua email.
+                </p>
+                <form onSubmit={async (e) => { e.preventDefault(); setNlLoading(true); await supabase.from('newsletter').insert({ email: nlEmail, stato: 'attiva' }); setNlLoading(false); setNlSent(true); }} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                  <input
+                    type="email"
+                    required
+                    value={nlEmail}
+                    onChange={(e) => setNlEmail(e.target.value)}
+                    placeholder="La tua email"
+                    className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                  <button
+                    type="submit"
+                    disabled={nlLoading}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-500 transition-colors whitespace-nowrap disabled:opacity-50"
+                  >
+                    {nlLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Iscriviti'}
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </section>
       </div>

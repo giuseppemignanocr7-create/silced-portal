@@ -24,15 +24,20 @@ import ComparatorePage from './pages/ComparatorePage';
 import FaqPage from './pages/FaqPage';
 import PartnerPage from './pages/PartnerPage';
 import LoginPage from './pages/LoginPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import DashboardCliente from './pages/cliente/DashboardCliente';
 import NuovaPratica from './pages/cliente/NuovaPratica';
 import PrenotaAppuntamento from './pages/cliente/PrenotaAppuntamento';
+import PratichePage from './pages/cliente/PratichePage';
+import DettaglioPratica from './pages/cliente/DettaglioPratica';
+import ProfiloPage from './pages/cliente/ProfiloPage';
+import NotifichePage from './pages/cliente/NotifichePage';
 import DashboardAdmin from './pages/admin/DashboardAdmin';
 import './index.css';
 
 function AppLayout() {
   const location = useLocation();
-  const hideLayout = location.pathname.startsWith('/area-cliente') || location.pathname.startsWith('/admin') || location.pathname === '/login';
+  const hideLayout = location.pathname.startsWith('/area-cliente') || location.pathname.startsWith('/admin') || location.pathname === '/login' || location.pathname === '/reset-password';
 
   return (
     <>
@@ -59,11 +64,16 @@ function AppLayout() {
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/partner" element={<PartnerPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Area Cliente (protetta) */}
             <Route path="/area-cliente" element={<ProtectedRoute><DashboardCliente /></ProtectedRoute>} />
             <Route path="/area-cliente/nuova-pratica" element={<ProtectedRoute><NuovaPratica /></ProtectedRoute>} />
             <Route path="/area-cliente/appuntamento" element={<ProtectedRoute><PrenotaAppuntamento /></ProtectedRoute>} />
+            <Route path="/area-cliente/pratiche" element={<ProtectedRoute><PratichePage /></ProtectedRoute>} />
+            <Route path="/area-cliente/pratiche/:id" element={<ProtectedRoute><DettaglioPratica /></ProtectedRoute>} />
+            <Route path="/area-cliente/profilo" element={<ProtectedRoute><ProfiloPage /></ProtectedRoute>} />
+            <Route path="/area-cliente/notifiche" element={<ProtectedRoute><NotifichePage /></ProtectedRoute>} />
 
             {/* Area Patronato (protetta — admin/operatore) */}
             <Route path="/admin" element={<ProtectedRoute requiredRole="operatore"><DashboardAdmin /></ProtectedRoute>} />

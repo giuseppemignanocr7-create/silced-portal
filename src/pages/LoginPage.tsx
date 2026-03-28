@@ -168,13 +168,18 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-2">
             <button
               onClick={() => { setIsRegister(!isRegister); setError(''); setSuccess(''); }}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium block mx-auto"
             >
               {isRegister ? 'Hai già un account? Accedi' : 'Non hai un account? Registrati'}
             </button>
+            {!isRegister && (
+              <Link to="/reset-password" className="text-sm text-gray-500 hover:text-gray-700 block">
+                Password dimenticata?
+              </Link>
+            )}
           </div>
         </div>
 

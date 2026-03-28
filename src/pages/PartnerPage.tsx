@@ -1,8 +1,30 @@
 import { useState } from 'react';
-import { Handshake, CheckCircle, TrendingUp, Users, Award, Phone, Send } from 'lucide-react';
+import { Handshake, CheckCircle, TrendingUp, Users, Award, Phone, Send, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export default function PartnerPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [form, setForm] = useState({ nome: '', cognome: '', email: '', telefono: '', citta: '', messaggio: '' });
+  const h = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const { error: err } = await supabase.from('partner_richieste').insert({
+      nome: form.nome,
+      cognome: form.cognome,
+      email: form.email,
+      telefono: form.telefono,
+      citta: form.citta,
+      messaggio: form.messaggio || null,
+      stato: 'richiesta',
+    });
+    setLoading(false);
+    if (err) { setError('Errore nell\'invio. Riprova.'); } else { setSubmitted(true); }
+  };
 
   return (
     <div className="min-h-screen">
@@ -90,37 +112,39 @@ export default function PartnerPage() {
               <p className="text-gray-600">Ti contatteremo entro 48 ore con tutte le informazioni.</p>
             </div>
           ) : (
-            <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="bg-white rounded-2xl p-6 lg:p-8 shadow-sm border border-gray-100 space-y-5">
+            <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 lg:p-8 shadow-sm border border-gray-100 space-y-5">
+              {error && <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">{error}</div>}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
-                  <input type="text" required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input type="text" name="nome" value={form.nome} onChange={h} required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Cognome *</label>
-                  <input type="text" required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input type="text" name="cognome" value={form.cognome} onChange={h} required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                  <input type="email" required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input type="email" name="email" value={form.email} onChange={h} required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Telefono *</label>
-                  <input type="tel" required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input type="tel" name="telefono" value={form.telefono} onChange={h} required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Città / Provincia *</label>
-                <input type="text" required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="es. Roma (RM)" />
+                <input type="text" name="citta" value={form.citta} onChange={h} required className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="es. Roma (RM)" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Messaggio</label>
-                <textarea rows={4} className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Descrivi brevemente la tua esperienza e motivazione..." />
+                <textarea name="messaggio" value={form.messaggio} onChange={h} rows={4} className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Descrivi brevemente la tua esperienza e motivazione..." />
               </div>
-              <button type="submit" className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-blue-900 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors">
-                <Send className="w-4 h-4" /> Invia richiesta partnership
+              <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-blue-900 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors disabled:opacity-50">
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {loading ? 'Invio in corso...' : 'Invia richiesta partnership'}
               </button>
             </form>
           )}

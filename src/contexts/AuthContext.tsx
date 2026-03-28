@@ -23,6 +23,8 @@ interface AuthContextType {
   signUp: (email: string, password: string, meta: { nome: string; cognome: string }) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
+  unreadCount: number;
   isAdmin: boolean;
   isOperatore: boolean;
   isCliente: boolean;
@@ -35,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
@@ -43,6 +46,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('id', userId)
       .single();
     if (data) setProfile(data as Profile);
+    const { count } = await supabase
+      .from('notifiche')
+      .select('*', { count: 'exact', head: true })
+      .eq('utente_id', userId)
+      .eq('letta', false);
+    setUnreadCount(count || 0);
+  };
+
+  const refreshProfile = async () => {
+    if (user) await fetchProfile(user.id);
   };
 
   useEffect(() => {
@@ -65,6 +78,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Real-time notifications
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('notifiche-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifiche', filter: `utente_id=eq.${user.id}` }, () => {
+        setUnreadCount(prev => prev + 1);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
 
   const signUp = async (email: string, password: string, meta: { nome: string; cognome: string }) => {
     const { error } = await supabase.auth.signUp({
@@ -90,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isCliente = profile?.ruolo === 'utente';
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signUp, signIn, signOut, isAdmin, isOperatore, isCliente }}>
+    <AuthContext.Provider value={{ user, profile, session, loading, signUp, signIn, signOut, refreshProfile, unreadCount, isAdmin, isOperatore, isCliente }}>
       {children}
     </AuthContext.Provider>
   );
