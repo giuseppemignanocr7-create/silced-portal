@@ -191,9 +191,9 @@ export default function AiChatWidget() {
   };
 
   return (
-    <div className={`fixed z-50 ${open ? 'inset-0 sm:inset-auto sm:bottom-6 sm:right-6' : 'bottom-6 right-6'}`}>
+    <div className={`fixed z-50 ${open ? 'inset-0 sm:inset-auto sm:bottom-24 sm:right-6' : 'bottom-6 right-6'}`}>
       {open && (
-        <div className="w-full h-full sm:mb-3 sm:w-[380px] sm:rounded-2xl sm:shadow-2xl bg-white sm:border border-gray-200 overflow-hidden flex flex-col sm:h-[540px]">
+        <div className="w-full h-full sm:w-[370px] sm:max-h-[min(500px,calc(100vh-120px))] sm:rounded-2xl sm:shadow-2xl bg-white sm:border border-gray-200 overflow-hidden flex flex-col">
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-700 to-violet-700 px-4 py-3 text-white shrink-0">
             <div className="flex items-center justify-between">
@@ -279,11 +279,11 @@ export default function AiChatWidget() {
           {/* Quick Suggestions */}
           {showSuggestions && messages.length <= 1 && (
             <div className="px-3 py-2 bg-white border-t border-gray-100 shrink-0">
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Suggerimenti rapidi</p>
-              <div className="flex flex-wrap gap-1.5">
+              <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Suggerimenti</p>
+              <div className="flex flex-wrap gap-1">
                 {quickSuggestions.slice(0, 6).map((s, i) => (
                   <button key={i} onClick={() => handleSend(s.text)}
-                    className="px-2.5 py-1 bg-gray-50 border border-gray-200 text-gray-700 rounded-lg text-[11px] hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors">
+                    className="px-2 py-0.5 bg-gray-50 border border-gray-200 text-gray-700 rounded-md text-[10px] hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors">
                     {s.label}
                   </button>
                 ))}
