@@ -169,7 +169,7 @@ export default function DashboardAdmin() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg mx-auto mb-4 animate-pulse">S</div>
+          <img src="/logo-silced.svg" alt="SILCED" className="h-10 w-auto mx-auto mb-4 animate-pulse" />
           <p className="text-gray-500 text-sm">Caricamento dashboard...</p>
         </div>
       </div>
@@ -180,12 +180,9 @@ export default function DashboardAdmin() {
     <div className="min-h-screen bg-gray-50 flex">
       {/* ─── Sidebar Desktop ─── */}
       <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-30">
-        <div className="flex items-center gap-3 px-6 h-16 border-b border-gray-100">
-          <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">S</div>
-          <div>
-            <div className="font-bold text-gray-900 text-sm leading-tight">SILCED</div>
-            <div className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Area Patronato</div>
-          </div>
+        <div className="flex items-center gap-3 px-5 h-16 border-b border-gray-100">
+          <img src="/logo-silced.svg" alt="SILCED" className="h-9 w-auto" />
+          <div className="text-[10px] text-gray-400 font-medium uppercase tracking-wider border-l border-gray-200 pl-3">Area Patronato</div>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -248,10 +245,7 @@ export default function DashboardAdmin() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setSidebarOpen(false)} />
           <aside className="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-5 h-16 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">S</div>
-                <span className="font-bold text-gray-900 text-sm">SILCED</span>
-              </div>
+              <img src="/logo-silced.svg" alt="SILCED" className="h-8 w-auto" />
               <button onClick={() => setSidebarOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5 text-gray-500" /></button>
             </div>
             <nav className="flex-1 px-3 py-4 space-y-1">

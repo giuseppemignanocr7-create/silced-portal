@@ -12,13 +12,7 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
-              <div>
-                <span className="text-xl font-bold text-white">SILCED</span>
-                <span className="block text-xs text-slate-400 -mt-1">Sindacato Italiano</span>
-              </div>
+              <img src="/logo-silced.svg" alt="SILCED" className="h-10 w-auto brightness-0 invert" />
             </div>
             <p className="text-sm text-slate-400 mb-6">
               Sindacato Italiano Lavoratori Centri Elaborazione Dati. Tutela legale, assistenza fiscale e previdenziale.

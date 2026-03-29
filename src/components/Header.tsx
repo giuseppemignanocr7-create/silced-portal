@@ -42,13 +42,7 @@ export default function Header() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
-            <div className="hidden sm:block">
-              <span className="text-xl font-bold text-blue-900">SILCED</span>
-              <span className="block text-xs text-gray-600 -mt-1">Sindacato Italiano</span>
-            </div>
+            <img src="/logo-silced.svg" alt="SILCED" className="h-10 sm:h-12 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}

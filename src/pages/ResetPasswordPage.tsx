@@ -24,9 +24,8 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center text-white font-bold">S</div>
-            <span className="text-xl font-bold text-gray-900">SILCED</span>
+          <Link to="/" className="inline-block mb-4">
+            <img src="/logo-silced.svg" alt="SILCED" className="h-12 w-auto mx-auto" />
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-4">Recupera password</h1>
           <p className="text-gray-600 mt-2">Inserisci la tua email per ricevere il link di reset</p>

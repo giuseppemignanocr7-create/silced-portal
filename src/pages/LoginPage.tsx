@@ -55,9 +55,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center text-white font-bold">S</div>
-            <span className="text-xl font-bold text-gray-900">SILCED</span>
+          <Link to="/" className="inline-block mb-4">
+            <img src="/logo-silced.svg" alt="SILCED" className="h-12 w-auto mx-auto" />
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-4">
             {isRegister ? 'Crea il tuo account' : 'Accedi al tuo account'}
