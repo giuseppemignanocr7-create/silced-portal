@@ -82,7 +82,7 @@ function AppLayout() {
           </Routes>
         </main>
         <div style={hideLayout ? { display: 'none' } : undefined}><Footer /></div>
-        <AiChatWidget />
+        {!location.pathname.startsWith('/admin') && <AiChatWidget />}
         <CookieBanner />
       </div>
     </>
