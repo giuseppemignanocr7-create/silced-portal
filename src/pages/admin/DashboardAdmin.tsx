@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import AiChatWidgetAdmin from '../../components/AiChatWidgetAdmin';
 
 /* ─── Types ─── */
 interface Stats {
@@ -334,6 +335,7 @@ export default function DashboardAdmin() {
           {activeTab === 'partner' && <PartnerTab />}
         </main>
       </div>
+      <AiChatWidgetAdmin stats={stats} onTabChange={(tab) => setActiveTab(tab as TabKey)} />
     </div>
   );
 }
