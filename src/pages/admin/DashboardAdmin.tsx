@@ -4,7 +4,7 @@ import {
   FileText, Users, Calendar, Bell, MessageSquare, TrendingUp,
   AlertTriangle, ArrowRight, LogOut, Handshake, BarChart3, Eye,
   Search, RefreshCw, ChevronRight, Clock, CheckCircle2, XCircle,
-  Mail, Phone, MapPin, Filter, X, Home, Settings
+  Mail, Phone, MapPin, Filter, X, Home, Settings, Plus, Lock, Unlock, Trash2
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -663,85 +663,302 @@ function PraticheTab() {
 
 /* ─── APPUNTAMENTI TAB ─── */
 function AppuntamentiTab() {
+  const [activeView, setActiveView] = useState<'slots' | 'prenotati'>('slots');
+  const [slots, setSlots] = useState<any[]>([]);
   const [appuntamenti, setAppuntamenti] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filtro, setFiltro] = useState<'futuri' | 'tutti' | 'passati'>('futuri');
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [generating, setGenerating] = useState(false);
+  const [sede, setSede] = useState('Roma - Via Roma 123');
 
-  useEffect(() => { loadAppuntamenti(); }, [filtro]);
+  useEffect(() => { loadData(); }, [activeView, selectedDate]);
 
-  const loadAppuntamenti = async () => {
+  const loadData = async () => {
     setLoading(true);
-    let query = supabase.from('appuntamenti').select('*').order('data_ora', { ascending: filtro !== 'passati' }).limit(50);
-    if (filtro === 'futuri') query = query.gte('data_ora', new Date().toISOString());
-    if (filtro === 'passati') query = query.lt('data_ora', new Date().toISOString());
-    const { data } = await query;
-    if (data) setAppuntamenti(data);
+    if (activeView === 'slots') {
+      const { data } = await supabase
+        .from('slot_disponibili')
+        .select('*')
+        .gte('data', selectedDate)
+        .lte('data', new Date(new Date(selectedDate).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+        .order('data', { ascending: true })
+        .order('ora', { ascending: true });
+      if (data) setSlots(data);
+    } else {
+      const { data } = await supabase
+        .from('appuntamenti')
+        .select('*')
+        .gte('data_ora', new Date().toISOString())
+        .order('data_ora', { ascending: true })
+        .limit(50);
+      if (data) setAppuntamenti(data);
+    }
     setLoading(false);
   };
 
-  const updateStato = async (id: string, stato: string) => {
-    await supabase.from('appuntamenti').update({ stato }).eq('id', id);
-    loadAppuntamenti();
+  const generaSlotGiorno = async () => {
+    setGenerating(true);
+    const orari = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'];
+    const newSlots = orari.map(ora => ({
+      data: selectedDate,
+      ora: ora + ':00',
+      sede,
+      stato: 'libero'
+    }));
+    
+    for (const slot of newSlots) {
+      await supabase.from('slot_disponibili').insert(slot);
+    }
+    
+    loadData();
+    setGenerating(false);
   };
+
+  const generaSlotSettimana = async () => {
+    setGenerating(true);
+    const startDate = new Date(selectedDate);
+    const orari = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'];
+    
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      const dayOfWeek = currentDate.getDay();
+      
+      // Skip weekends
+      if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+      
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const newSlots = orari.map(ora => ({
+        data: dateStr,
+        ora: ora + ':00',
+        sede,
+        stato: 'libero'
+      }));
+      
+      for (const slot of newSlots) {
+        await supabase.from('slot_disponibili').insert(slot);
+      }
+    }
+    
+    loadData();
+    setGenerating(false);
+  };
+
+  const eliminaSlot = async (id: string) => {
+    await supabase.from('slot_disponibili').delete().eq('id', id);
+    loadData();
+  };
+
+  const bloccaSlot = async (id: string) => {
+    await supabase.from('slot_disponibili').update({ stato: 'bloccato' }).eq('id', id);
+    loadData();
+  };
+
+  const sbloccaSlot = async (id: string) => {
+    await supabase.from('slot_disponibili').update({ stato: 'libero' }).eq('id', id);
+    loadData();
+  };
+
+  const updateStatoAppuntamento = async (id: string, stato: string) => {
+    await supabase.from('appuntamenti').update({ stato }).eq('id', id);
+    loadData();
+  };
+
+  const slotStatoConfig: Record<string, { bg: string; text: string; label: string; dot: string }> = {
+    libero:    { bg: 'bg-green-50',  text: 'text-green-700',  label: 'Libero',    dot: 'bg-green-500' },
+    prenotato: { bg: 'bg-blue-50',   text: 'text-blue-700',   label: 'Prenotato', dot: 'bg-blue-500' },
+    bloccato:  { bg: 'bg-gray-100',  text: 'text-gray-500',   label: 'Bloccato',  dot: 'bg-gray-400' },
+  };
+
+  // Group slots by date
+  const slotsByDate = slots.reduce((acc: Record<string, typeof slots>, slot: typeof slots[0]) => {
+    if (!acc[slot.data]) acc[slot.data] = [];
+    acc[slot.data].push(slot);
+    return acc;
+  }, {} as Record<string, typeof slots>);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        {(['futuri', 'tutti', 'passati'] as const).map(f => (
-          <button
-            key={f}
-            onClick={() => setFiltro(f)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              filtro === f ? 'bg-blue-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            {f === 'futuri' ? 'Prossimi' : f === 'tutti' ? 'Tutti' : 'Passati'}
-          </button>
-        ))}
+      {/* View Toggle */}
+      <div className="flex items-center gap-2 mb-4">
+        <button
+          onClick={() => setActiveView('slots')}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            activeView === 'slots' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          <Calendar className="w-4 h-4 inline mr-1" /> Gestione Slot
+        </button>
+        <button
+          onClick={() => setActiveView('prenotati')}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            activeView === 'prenotati' ? 'bg-blue-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          <Users className="w-4 h-4 inline mr-1" /> Appuntamenti Prenotati
+        </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        {loading ? <Spinner /> : appuntamenti.length > 0 ? (
-          <div className="divide-y divide-gray-50">
-            {appuntamenti.map(a => {
-              const sc = appStatoConfig[a.stato] || appStatoConfig.prenotato;
-              const dt = new Date(a.data_ora);
-              return (
-                <div key={a.id} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50/50 transition-colors">
-                  <div className="w-14 h-14 bg-indigo-50 rounded-xl flex flex-col items-center justify-center shrink-0">
-                    <div className="text-lg font-bold text-indigo-700 leading-none">{dt.getDate()}</div>
-                    <div className="text-[10px] text-indigo-500 uppercase font-bold">{dt.toLocaleDateString('it-IT', { month: 'short' })}</div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-gray-900">{a.nome} {a.cognome}</div>
-                    <div className="flex items-center gap-3 text-xs text-gray-400 mt-1">
-                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{dt.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
-                      <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{a.email}</span>
-                      {a.telefono && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{a.telefono}</span>}
-                    </div>
-                    {a.note && <p className="text-xs text-gray-400 mt-1 truncate max-w-md">{a.note}</p>}
-                  </div>
-                  <Badge className={`${sc.bg} ${sc.text} shrink-0`}>{sc.label}</Badge>
-                  <div className="flex items-center gap-1 shrink-0">
-                    {a.stato === 'prenotato' && (
-                      <button onClick={() => updateStato(a.id, 'confermato')} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Conferma">
-                        <CheckCircle2 className="w-4 h-4" />
-                      </button>
-                    )}
-                    {['prenotato', 'confermato'].includes(a.stato) && (
-                      <button onClick={() => updateStato(a.id, 'annullato')} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Annulla">
-                        <XCircle className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+      {activeView === 'slots' ? (
+        <>
+          {/* Slot Management Header */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5">
+            <div className="flex flex-wrap items-end gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Data inizio</label>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sede</label>
+                <select
+                  value={sede}
+                  onChange={(e) => setSede(e.target.value)}
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option>Roma - Via Roma 123</option>
+                  <option>Milano - Via Milano 456</option>
+                  <option>Napoli - Via Napoli 789</option>
+                </select>
+              </div>
+              <div className="flex gap-2 ml-auto">
+                <button
+                  onClick={generaSlotGiorno}
+                  disabled={generating}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {generating ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> : <Plus className="w-4 h-4" />}
+                  Genera slot giorno
+                </button>
+                <button
+                  onClick={generaSlotSettimana}
+                  disabled={generating}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {generating ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> : <Plus className="w-4 h-4" />}
+                  Genera settimana
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-3">
+              Genera automaticamente slot di 30 minuti dalle 9:00 alle 12:30 e dalle 14:00 alle 16:30
+            </p>
           </div>
-        ) : (
-          <EmptyState icon={Calendar} title="Nessun appuntamento" description={filtro === 'futuri' ? 'Non ci sono appuntamenti futuri in programma.' : 'Nessun appuntamento trovato.'} />
-        )}
-      </div>
+
+          {/* Slots by Date */}
+          <div className="space-y-4">
+            {loading ? <Spinner /> : Object.keys(slotsByDate).length > 0 ? (
+              Object.entries(slotsByDate).map(([date, daySlots]: [string, typeof slots]) => {
+                const dt = new Date(date);
+                const isToday = date === new Date().toISOString().split('T')[0];
+                return (
+                  <div key={date} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                    <div className="px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <span className="text-sm font-bold text-blue-700">{dt.getDate()}</span>
+                        </div>
+                        <div>
+                          <div className="font-semibold text-gray-900">
+                            {dt.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}
+                            {isToday && <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Oggi</span>}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {daySlots.filter(s => s.stato === 'libero').length} liberi · {daySlots.filter(s => s.stato === 'prenotato').length} prenotati · {daySlots.filter(s => s.stato === 'bloccato').length} bloccati
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                      {daySlots.map((slot: typeof slots[0]) => {
+                        const sc = slotStatoConfig[slot.stato];
+                        return (
+                          <div
+                            key={slot.id}
+                            className={`p-3 rounded-xl border ${sc.bg} ${slot.stato === 'libero' ? 'border-green-200' : slot.stato === 'prenotato' ? 'border-blue-200' : 'border-gray-200'} flex items-center justify-between`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`w-2 h-2 rounded-full ${sc.dot}`} />
+                              <span className={`font-semibold text-sm ${sc.text}`}>{slot.ora.slice(0, 5)}</span>
+                            </div>
+                            <div className="flex gap-1">
+                              {slot.stato === 'libero' && (
+                                <button onClick={() => bloccaSlot(slot.id)} className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded" title="Blocca">
+                                  <Lock className="w-3 h-3" />
+                                </button>
+                              )}
+                              {slot.stato === 'bloccato' && (
+                                <button onClick={() => sbloccaSlot(slot.id)} className="p-1 text-gray-400 hover:text-green-600 hover:bg-green-100 rounded" title="Sblocca">
+                                  <Unlock className="w-3 h-3" />
+                                </button>
+                              )}
+                              {slot.stato !== 'prenotato' && (
+                                <button onClick={() => eliminaSlot(slot.id)} className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded" title="Elimina">
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <EmptyState icon={Calendar} title="Nessuno slot disponibile" description="Genera slot per la data selezionata usando i pulsanti sopra." />
+            )}
+          </div>
+        </>
+      ) : (
+        /* Booked Appointments View */
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          {loading ? <Spinner /> : appuntamenti.length > 0 ? (
+            <div className="divide-y divide-gray-50">
+              {appuntamenti.map(a => {
+                const sc = appStatoConfig[a.stato] || appStatoConfig.prenotato;
+                const dt = new Date(a.data_ora);
+                return (
+                  <div key={a.id} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50/50 transition-colors">
+                    <div className="w-14 h-14 bg-indigo-50 rounded-xl flex flex-col items-center justify-center shrink-0">
+                      <div className="text-lg font-bold text-indigo-700 leading-none">{dt.getDate()}</div>
+                      <div className="text-[10px] text-indigo-500 uppercase font-bold">{dt.toLocaleDateString('it-IT', { month: 'short' })}</div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-gray-900">{a.nome} {a.cognome}</div>
+                      <div className="flex items-center gap-3 text-xs text-gray-400 mt-1">
+                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{dt.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{a.email}</span>
+                        {a.telefono && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{a.telefono}</span>}
+                      </div>
+                      {a.note && <p className="text-xs text-gray-400 mt-1 truncate max-w-md">{a.note}</p>}
+                    </div>
+                    <Badge className={`${sc.bg} ${sc.text} shrink-0`}>{sc.label}</Badge>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {a.stato === 'prenotato' && (
+                        <button onClick={() => updateStatoAppuntamento(a.id, 'confermato')} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Conferma">
+                          <CheckCircle2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      {['prenotato', 'confermato'].includes(a.stato) && (
+                        <button onClick={() => updateStatoAppuntamento(a.id, 'annullato')} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Annulla">
+                          <XCircle className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyState icon={Calendar} title="Nessun appuntamento prenotato" description="Non ci sono appuntamenti futuri in programma." />
+          )}
+        </div>
+      )}
     </div>
   );
 }
