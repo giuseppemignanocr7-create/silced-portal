@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ArrowRight, Calculator, Briefcase, Users, Building2, Car, FileCheck, Shield, Award, Phone, Globe, Home, TrendingUp, Bot, BarChart3, Sparkles, Handshake } from 'lucide-react';
-import { serviceCategories, allServices, courses, newsItems } from '../data/services';
+import { Search, ArrowRight, Calculator, Briefcase, Users, Building2, Car, FileCheck, Shield, Phone, Globe, Home, TrendingUp, Bot, BarChart3, Sparkles, Handshake } from 'lucide-react';
+import { serviceCategories, allServices, newsItems } from '../data/services';
 
 const iconMap: Record<string, React.ElementType> = {
   Calculator, Briefcase, Users, Building2, Car, FileCheck, Globe, Home
@@ -73,7 +73,7 @@ export default function HomePage() {
                 <Shield className="w-4 h-4 text-green-400" /> Soddisfatti o rimborsati
               </span>
               <span className="flex items-center justify-center gap-2">
-                <Award className="w-4 h-4 text-yellow-400" /> 25+ anni di esperienza
+                <Shield className="w-4 h-4 text-yellow-400" /> 25+ anni di esperienza
               </span>
               <span className="flex items-center justify-center gap-2">
                 <Phone className="w-4 h-4 text-blue-400" /> Assistenza telefonica
@@ -163,55 +163,6 @@ export default function HomePage() {
               Vedi tutti i servizi
               <ArrowRight className="w-4 h-4" />
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Formazione Preview */}
-      <section className="py-16 lg:py-20 bg-slate-900 text-white">
-        <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-                Silced Academy
-              </h2>
-              <p className="text-slate-300 mb-6 text-lg">
-                Formazione professionale per operatori CAF e Patronato. Corsi certificati per lavorare nel settore fiscale e previdenziale.
-              </p>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-3">
-                  <Award className="w-5 h-5 text-blue-400" />
-                  <span>Attestato di qualifica professionale</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Users className="w-5 h-5 text-blue-400" />
-                  <span>Docenti esperti del settore</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Calculator className="w-5 h-5 text-blue-400" />
-                  <span>Casi pratici ed esercitazioni</span>
-                </li>
-              </ul>
-              <Link
-                to="/formazione"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-500 transition-colors"
-              >
-                Scopri i corsi
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-            <div className="grid gap-4">
-              {courses.slice(0, 3).map((course) => (
-                <div key={course.id} className="bg-slate-800 rounded-xl p-5">
-                  <h3 className="font-semibold mb-1">{course.title}</h3>
-                  <p className="text-slate-400 text-sm mb-3">{course.description.slice(0, 80)}...</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-blue-400">{course.duration}</span>
-                    <span className="text-slate-400">{course.level}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
